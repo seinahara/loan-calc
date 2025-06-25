@@ -41,15 +41,36 @@
 
   <!-- 入力画面 -->
   <div id="input-screen" class="card rounded-2xl shadow-lg p-8 w-full max-w-2xl">
-    <h1 class="text-xl font-bold text-center mb-6">🚗 車のローン計算機</h1>
+    <h1 class="text-xl sm:text-2xl font-bold text-center mb-6">🚗 車のローン計算機</h1>
 
-    <form id="loan-form" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <input id="amount" type="number" placeholder="ローン金額（円）" required
-             class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
-      <input id="rate" type="number" step="0.01" placeholder="年利（%）" required
-             class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
-      <input id="years" type="number" placeholder="返済年数" required
-             class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
+    <form id="loan-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <!-- ローン金額 -->
+      <div class="flex flex-col">
+        <label for="amount" class="mb-1 text-sm font-semibold text-gray-300">ローン金額（円）</label>
+        <input id="amount" type="number" placeholder="例: 2000000" required
+               class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
+      </div>
+
+      <!-- 年利 -->
+      <div class="flex flex-col">
+        <label for="rate" class="mb-1 text-sm font-semibold text-gray-300">年利（%）</label>
+        <input id="rate" type="number" step="0.01" placeholder="例: 1.5" required
+               class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
+      </div>
+
+      <!-- 返済年数 -->
+      <div class="flex flex-col">
+        <label for="years" class="mb-1 text-sm font-semibold text-gray-300">返済年数</label>
+        <input id="years" type="number" placeholder="例: 5" required
+               class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
+      </div>
+
+      <!-- 残価 -->
+      <div class="flex flex-col">
+        <label for="residual-value" class="mb-1 text-sm font-semibold text-gray-300">残価（円）</label>
+        <input id="residual-value" type="number" placeholder="例: 500000" 
+               class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
+      </div>
     </form>
 
     <button type="submit" form="loan-form"
@@ -66,15 +87,21 @@
         ← 戻る
       </button>
     </div>
-    <p>💸 <strong>毎月の支払額:</strong> <span id="monthly-payment" class="text-blue-600"></span> 円</p>
-    <p>💰 <strong>総支払額:</strong> <span id="total-payment" class="text-blue-600"></span> 円</p>
+    <p class="text-lg sm:text-xl mt-4">
+      💸 <strong>毎月の支払額:</strong>
+      <span id="monthly-payment" class="text-blue-600"></span> 円
+    </p>
+    <p class="text-lg sm:text-xl">
+      💰 <strong>総支払額:</strong>
+      <span id="total-payment" class="text-blue-600"></span> 円
+    </p>
 
     <div class="flex flex-col md:flex-row gap-6 mt-6">
-      <div class="md:w-1/2">
+      <div class="w-full md:w-1/2">
         <canvas id="loan-chart"></canvas>
       </div>
       <div class="md:w-1/2 overflow-x-auto">
-        <table class="w-full text-sm text-left border-collapse mt-2">
+        <table class="w-full text-sm sm:text-base text-left border-collapse mt-2">
           <thead class="bg-gray-200 text-black">
             <tr>
               <th class="px-2 py-1">年月</th>
@@ -119,12 +146,18 @@
       const amount = parseFloat(document.getElementById("amount").value);
       const annualRate = parseFloat(document.getElementById("rate").value);
       const years = parseInt(document.getElementById("years").value);
+      const residualValue = parseFloat(document.getElementById("residual-value").value || 0);
       const months = years * 12;
       const monthlyRate = annualRate / 100 / 12;
 
-      const monthlyPayment = (amount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months));
-      const totalPayment = monthlyPayment * months;
+      // ローン金額から残価を引いた額を計算
+      const loanAmount = amount - residualValue;
 
+      // 毎月の支払額計算
+      const monthlyPayment = (loanAmount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months));
+      const totalPayment = monthlyPayment * months + residualValue;
+
+      // 結果を画面に表示
       document.getElementById("monthly-payment").textContent = Math.round(monthlyPayment).toLocaleString();
       document.getElementById("total-payment").textContent = Math.round(totalPayment).toLocaleString();
 
@@ -134,7 +167,7 @@
 
       const scheduleBody = document.getElementById("schedule-body");
       scheduleBody.innerHTML = "";
-      let balance = amount;
+      let balance = loanAmount;
       let totalInterest = 0;
 
       for (let i = 0; i < months; i++) {
@@ -162,7 +195,7 @@
         data: {
           labels: ['元金', '利息'],
           datasets: [{
-            data: [amount, totalInterest],
+            data: [loanAmount, totalInterest],
             backgroundColor: ['#3b82f6', '#facc15']
           }]
         },
