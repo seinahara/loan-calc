@@ -25,6 +25,9 @@
       background-color: var(--card-color);
       transition: background-color 0.3s;
     }
+    .bonus-row {
+      background-color: rgba(34, 197, 94, 0.1); /* 緑っぽい背景 */
+    }
   </style>
 </head>
 <body class="font-sans min-h-screen flex flex-col items-center justify-center px-4 py-10">
@@ -39,41 +42,82 @@
   <!-- 入力画面 -->
   <div id="input-screen" class="card rounded-2xl shadow-lg p-8 w-full max-w-2xl">
     <h1 class="text-xl sm:text-2xl font-bold text-center mb-6">🚗 車のローン計算機</h1>
-
-    <!-- <form id="loan-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"> -->
-    <form id="loan-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+    <!-- <form id="loan-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6"> -->
+    <form id="loan-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
       <div class="flex flex-col">
-        <label for="amount" class="mb-1 text-sm font-semibold text-gray-300">ローン金額（円）</label>
+         <label for="amount" class="mb-1 text-sm font-semibold">ローン金額（円）</label>
         <input id="amount" type="number" placeholder="例: 2000000" required
                class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
       </div>
       <div class="flex flex-col">
-        <label for="rate" class="mb-1 text-sm font-semibold text-gray-300">年利（%）</label>
+        <label for="rate" class="mb-1 text-sm font-semibold">年利（%）</label>
         <input id="rate" type="number" step="0.01" placeholder="例: 1.5" required
                class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
       </div>
       <div class="flex flex-col">
-        <label for="years" class="mb-1 text-sm font-semibold text-gray-300">返済年数</label>
+        <label for="years" class="mb-1 text-sm font-semibold">返済年数</label>
         <input id="years" type="number" placeholder="例: 5" required
                class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
       </div>
       <div class="flex flex-col">
-        <label for="down-payment" class="mb-1 text-sm font-semibold text-gray-300">頭金（円）</label>
+        <label for="down-payment" class="mb-1 text-sm font-semibold">頭金（円）</label>
         <input id="down-payment" type="number" placeholder="例: 500000"
                class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
       </div>
       <div class="flex flex-col">
-        <label for="residual-value" class="mb-1 text-sm font-semibold text-gray-300">残価（円）</label>
+        <label for="residual-value" class="mb-1 text-sm font-semibold">残価（円）</label>
         <input id="residual-value" type="number" placeholder="例: 500000"
                class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
       </div>
       <div class="flex flex-col mb-4 w-full max-w-2xl">
-        <label for="bonus-amount" class="mb-1 text-sm font-semibold text-gray-300">ボーナス加算額（円）</label>
+        <label for="bonus-amount" class="mb-1 text-sm font-semibold">ボーナス加算額（円）</label>
         <input id="bonus-amount" type="number" placeholder="例: 50000"
               class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
+            </div>
+    <div class="col-span-full mt-4">
+      <label class="mb-1 text-sm font-semibold">
+        🎁 ボーナス月（複数選択可）
+      </label>
+      <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 text-sm">
+        <label class="font-semibold">
+          <input type="checkbox" value="1" class="bonus-month"> 1月
+        </label>
+        <label class="font-semibold">
+          <input type="checkbox" value="2" class="bonus-month"> 2月
+        </label>
+        <label class="font-semibold">
+          <input type="checkbox" value="3" class="bonus-month"> 3月
+        </label>
+        <label class="font-semibold">
+          <input type="checkbox" value="4" class="bonus-month"> 4月
+        </label>
+        <label class="font-semibold">
+          <input type="checkbox" value="5" class="bonus-month"> 5月
+        </label>
+        <label class="font-semibold">
+          <input type="checkbox" value="6" class="bonus-month"> 6月
+        </label>
+        <label class="font-semibold">
+          <input type="checkbox" value="7" class="bonus-month"> 7月
+        </label>
+        <label class="font-semibold">
+          <input type="checkbox" value="8" class="bonus-month"> 8月
+        </label>
+        <label class="font-semibold">
+          <input type="checkbox" value="9" class="bonus-month"> 9月
+        </label>
+        <label class="font-semibold">
+          <input type="checkbox" value="10" class="bonus-month"> 10月
+        </label>
+        <label class="font-semibold">
+          <input type="checkbox" value="11" class="bonus-month"> 11月
+        </label>
+        <label class="font-semibold">
+          <input type="checkbox" value="12" class="bonus-month"> 12月
+        </label>
       </div>
-
+    </div>
     </form>
 
     <button type="submit" form="loan-form"
@@ -146,7 +190,7 @@
 
     form.addEventListener("submit", function(e) {
       e.preventDefault();
-
+      const checkedMonths = [...document.querySelectorAll(".bonus-month:checked")].map(el => parseInt(el.value));
       const amount = parseFloat(document.getElementById("amount").value);
       const annualRate = parseFloat(document.getElementById("rate").value);
       const years = parseInt(document.getElementById("years").value);
@@ -164,12 +208,10 @@
       const monthlyRate = annualRate / 100 / 12;
 
       const monthlyPayment = (loanAmount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months));
-      let totalPayment = residualValue;
+      let totalPayment = 0;
       let totalPrincipal = 0;
 
       document.getElementById("monthly-payment").textContent = Math.round(monthlyPayment).toLocaleString();
-      document.getElementById("total-payment").textContent = Math.round(totalPayment).toLocaleString();
-
       document.getElementById("summary-amount").textContent = amount.toLocaleString();
       document.getElementById("summary-down").textContent = downPayment.toLocaleString();
       document.getElementById("summary-residual").textContent = residualValue.toLocaleString();
@@ -188,7 +230,9 @@
       let totalInterest = 0;
 
       for (let i = 0; i < months; i++) {
-        const isBonusMonth = ((startMonth + i) % 12 === 5 || (startMonth + i) % 12 === 11);
+        const currentDate = new Date(startYear, startMonth + i, 1);
+        const currentMonth = currentDate.getMonth() + 1;
+        const isBonusMonth = checkedMonths.includes(currentMonth);
         const bonusPay = isBonusMonth ? bonusAmount : 0;
         const interest = balance * monthlyRate;
         const principal = monthlyPayment + bonusPay - interest;
@@ -210,27 +254,31 @@
           </tr>
         `;
       }
+      totalPayment += residualValue
+      document.getElementById("total-payment").textContent = Math.round(totalPayment).toLocaleString();
 
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
       if (chart) chart.destroy();
+
         chart = new Chart(chartCanvas, {
           type: 'doughnut',
           data: {
             labels: ['元金', '利息'],
             datasets: [{
               data: [totalPrincipal, totalInterest],
-              backgroundColor: ['#3b82f6', '#facc15']
+              backgroundColor: ['#3b82f6', '#facc15'],
             }]
           },
-        options: {
-          plugins: {
-            legend: {
-              labels: {
-                color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#e2e8f0' : '#111827'
+          options: {
+            plugins: {
+              legend: {
+                labels: {
+                  color: isDark ? '#e2e8f0' : '#111827'  // ライトモードで黒
+                }
               }
             }
           }
-        }
-      });
+        });
 
       inputScreen.classList.add('hidden');
       resultScreen.classList.remove('hidden');
