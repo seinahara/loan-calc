@@ -68,6 +68,12 @@
         <input id="residual-value" type="number" placeholder="例: 500000"
                class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
       </div>
+      <div class="flex flex-col mb-4 w-full max-w-2xl">
+        <label for="bonus-amount" class="mb-1 text-sm font-semibold text-gray-300">ボーナス加算額（円）</label>
+        <input id="bonus-amount" type="number" placeholder="例: 50000"
+              class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
+      </div>
+
     </form>
 
     <button type="submit" form="loan-form"
@@ -83,7 +89,8 @@
     <p class="mb-2">💵 <strong>頭金：</strong><span id="summary-down" class="text-blue-600"></span> 円</p>
     <p class="mb-2">📉 <strong>残価：</strong><span id="summary-residual" class="text-blue-600"></span> 円</p>
     <p class="mb-2">📆 <strong>返済年数：</strong><span id="summary-years" class="text-blue-600"></span> 年</p>
-    <p class="mb-0">📈 <strong>金利：</strong><span id="summary-rate" class="text-blue-600"></span> %</p>
+    <p class="mb-0">📈 <strong>年利：</strong><span id="summary-rate" class="text-blue-600"></span> %</p>
+    <p class="mb-0">🎁 <strong>ボーナス加算額：</strong><span id="summary-bonus-amount" class="text-blue-600"></span> 円</p>
   </div>
 
     <div class="mb-4 flex justify-between items-center">
@@ -100,10 +107,8 @@
       <div class="w-full md:w-1/2">
         <canvas id="loan-chart"></canvas>
       </div>
-      <!-- <div class="md:w-1/2 overflow-x-auto"> -->
       <div class="md:w-1/2 overflow-x-auto max-w-full">
         <h3 class="text-lg font-semibold mb-2">📅 返済スケジュール</h3>
-        <!-- <table class="w-full text-sm sm:text-base text-left border-collapse mt-2"> -->
         <table class="w-full text-xs sm:text-sm text-left border-collapse mt-2 min-w-[400px]">          
           <thead class="bg-gray-200 text-black">
             <tr>
@@ -118,7 +123,6 @@
       </div>
     </div>
   </div>
-
   <script>
     const form = document.getElementById("loan-form");
     const resultScreen = document.getElementById("result-screen");
@@ -148,6 +152,7 @@
       const years = parseInt(document.getElementById("years").value);
       const downPayment = parseFloat(document.getElementById("down-payment").value || 0);
       const residualValue = parseFloat(document.getElementById("residual-value").value || 0);
+      const bonusAmount = parseFloat(document.getElementById("bonus-amount").value || 0);
 
       if (downPayment < 0 || downPayment + residualValue >= amount) {
         alert("頭金と残価の合計はローン金額より小さくしてください");
@@ -159,7 +164,8 @@
       const monthlyRate = annualRate / 100 / 12;
 
       const monthlyPayment = (loanAmount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months));
-      const totalPayment = monthlyPayment * months + residualValue;
+      let totalPayment = residualValue;
+      let totalPrincipal = 0;
 
       document.getElementById("monthly-payment").textContent = Math.round(monthlyPayment).toLocaleString();
       document.getElementById("total-payment").textContent = Math.round(totalPayment).toLocaleString();
@@ -169,6 +175,8 @@
       document.getElementById("summary-residual").textContent = residualValue.toLocaleString();
       document.getElementById("summary-years").textContent = years;
       document.getElementById("summary-rate").textContent = annualRate;
+      document.getElementById("summary-bonus-amount").textContent = bonusAmount.toLocaleString();
+
 
       const today = new Date();
       const startYear = today.getMonth() === 11 ? today.getFullYear() + 1 : today.getFullYear();
@@ -180,16 +188,21 @@
       let totalInterest = 0;
 
       for (let i = 0; i < months; i++) {
+        const isBonusMonth = ((startMonth + i) % 12 === 5 || (startMonth + i) % 12 === 11);
+        const bonusPay = isBonusMonth ? bonusAmount : 0;
         const interest = balance * monthlyRate;
-        const principal = monthlyPayment - interest;
+        const principal = monthlyPayment + bonusPay - interest;
         balance -= principal;
         totalInterest += interest;
+        totalPrincipal += principal;
+        totalPayment += monthlyPayment + bonusPay;
 
         const date = new Date(startYear, startMonth + i, 1);
         const yyyymm = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}`;
+        const rowClass = isBonusMonth ? 'bonus-row' : '';
 
         scheduleBody.innerHTML += `
-          <tr>
+          <tr class="${rowClass}">
             <td class="px-2 py-1">${yyyymm}</td>
             <td class="px-2 py-1">${Math.round(principal).toLocaleString()}</td>
             <td class="px-2 py-1">${Math.round(interest).toLocaleString()}</td>
@@ -199,15 +212,15 @@
       }
 
       if (chart) chart.destroy();
-      chart = new Chart(chartCanvas, {
-        type: 'doughnut',
-        data: {
-          labels: ['元金', '利息'],
-          datasets: [{
-            data: [loanAmount, totalInterest],
-            backgroundColor: ['#3b82f6', '#facc15']
-          }]
-        },
+        chart = new Chart(chartCanvas, {
+          type: 'doughnut',
+          data: {
+            labels: ['元金', '利息'],
+            datasets: [{
+              data: [totalPrincipal, totalInterest],
+              backgroundColor: ['#3b82f6', '#facc15']
+            }]
+          },
         options: {
           plugins: {
             legend: {
