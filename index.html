@@ -11,19 +11,16 @@
       --text-color: #f1f5f9;
       --card-color: #1e293b;
     }
-
     [data-theme="light"] {
       --bg-color: #f8fafc;
       --text-color: #1e293b;
       --card-color: #ffffff;
     }
-
     body {
       background-color: var(--bg-color);
       color: var(--text-color);
       transition: background-color 0.3s, color 0.3s;
     }
-
     .card {
       background-color: var(--card-color);
       transition: background-color 0.3s;
@@ -32,7 +29,7 @@
 </head>
 <body class="font-sans min-h-screen flex flex-col items-center justify-center px-4 py-10">
 
-  <!-- トグル -->
+  <!-- テーマ切替 -->
   <div class="absolute top-4 right-4">
     <button id="themeToggle" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
       🌙 ダークモード
@@ -43,32 +40,32 @@
   <div id="input-screen" class="card rounded-2xl shadow-lg p-8 w-full max-w-2xl">
     <h1 class="text-xl sm:text-2xl font-bold text-center mb-6">🚗 車のローン計算機</h1>
 
-    <form id="loan-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      <!-- ローン金額 -->
+    <!-- <form id="loan-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"> -->
+    <form id="loan-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+
       <div class="flex flex-col">
         <label for="amount" class="mb-1 text-sm font-semibold text-gray-300">ローン金額（円）</label>
         <input id="amount" type="number" placeholder="例: 2000000" required
                class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
       </div>
-
-      <!-- 年利 -->
       <div class="flex flex-col">
         <label for="rate" class="mb-1 text-sm font-semibold text-gray-300">年利（%）</label>
         <input id="rate" type="number" step="0.01" placeholder="例: 1.5" required
                class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
       </div>
-
-      <!-- 返済年数 -->
       <div class="flex flex-col">
         <label for="years" class="mb-1 text-sm font-semibold text-gray-300">返済年数</label>
         <input id="years" type="number" placeholder="例: 5" required
                class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
       </div>
-
-      <!-- 残価 -->
+      <div class="flex flex-col">
+        <label for="down-payment" class="mb-1 text-sm font-semibold text-gray-300">頭金（円）</label>
+        <input id="down-payment" type="number" placeholder="例: 500000"
+               class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
+      </div>
       <div class="flex flex-col">
         <label for="residual-value" class="mb-1 text-sm font-semibold text-gray-300">残価（円）</label>
-        <input id="residual-value" type="number" placeholder="例: 500000" 
+        <input id="residual-value" type="number" placeholder="例: 500000"
                class="w-full px-4 py-2 rounded bg-slate-200 text-black focus:ring focus:ring-blue-500">
       </div>
     </form>
@@ -81,27 +78,33 @@
 
   <!-- 結果画面 -->
   <div id="result-screen" class="card rounded-2xl shadow-lg p-6 w-full max-w-6xl hidden">
+  <div id="input-summary" class="mb-6 text-base sm:text-lg text-slate-500 bg-slate-100 dark:bg-slate-700 rounded-lg p-4">
+    <p class="mb-2">🚘 <strong>ローン金額：</strong><span id="summary-amount" class="text-blue-600"></span> 円</p>
+    <p class="mb-2">💵 <strong>頭金：</strong><span id="summary-down" class="text-blue-600"></span> 円</p>
+    <p class="mb-2">📉 <strong>残価：</strong><span id="summary-residual" class="text-blue-600"></span> 円</p>
+    <p class="mb-2">📆 <strong>返済年数：</strong><span id="summary-years" class="text-blue-600"></span> 年</p>
+    <p class="mb-0">📈 <strong>金利：</strong><span id="summary-rate" class="text-blue-600"></span> %</p>
+  </div>
+
     <div class="mb-4 flex justify-between items-center">
+
       <h2 class="text-lg font-semibold">📊 計算結果</h2>
       <button id="backBtn" class="text-sm bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded">
         ← 戻る
       </button>
     </div>
-    <p class="text-lg sm:text-xl mt-4">
-      💸 <strong>毎月の支払額:</strong>
-      <span id="monthly-payment" class="text-blue-600"></span> 円
-    </p>
-    <p class="text-lg sm:text-xl">
-      💰 <strong>総支払額:</strong>
-      <span id="total-payment" class="text-blue-600"></span> 円
-    </p>
+    <p class="text-lg sm:text-xl mt-4">💸 <strong>毎月の支払額:</strong> <span id="monthly-payment" class="text-blue-600"></span> 円</p>
+    <p class="text-lg sm:text-xl">💰 <strong>総支払額:</strong> <span id="total-payment" class="text-blue-600"></span> 円</p>
 
     <div class="flex flex-col md:flex-row gap-6 mt-6">
       <div class="w-full md:w-1/2">
         <canvas id="loan-chart"></canvas>
       </div>
-      <div class="md:w-1/2 overflow-x-auto">
-        <table class="w-full text-sm sm:text-base text-left border-collapse mt-2">
+      <!-- <div class="md:w-1/2 overflow-x-auto"> -->
+      <div class="md:w-1/2 overflow-x-auto max-w-full">
+        <h3 class="text-lg font-semibold mb-2">📅 返済スケジュール</h3>
+        <!-- <table class="w-full text-sm sm:text-base text-left border-collapse mt-2"> -->
+        <table class="w-full text-xs sm:text-sm text-left border-collapse mt-2 min-w-[400px]">          
           <thead class="bg-gray-200 text-black">
             <tr>
               <th class="px-2 py-1">年月</th>
@@ -123,8 +126,7 @@
     const themeToggle = document.getElementById("themeToggle");
     const chartCanvas = document.getElementById("loan-chart");
     let chart;
-
-    // テーマ設定
+    
     function setTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
@@ -136,30 +138,37 @@
       setTheme(current === "dark" ? "light" : "dark");
     });
 
-    // 初期テーマ
     setTheme(localStorage.getItem('theme') || 'dark');
 
-    // ローン計算
     form.addEventListener("submit", function(e) {
       e.preventDefault();
 
       const amount = parseFloat(document.getElementById("amount").value);
       const annualRate = parseFloat(document.getElementById("rate").value);
       const years = parseInt(document.getElementById("years").value);
+      const downPayment = parseFloat(document.getElementById("down-payment").value || 0);
       const residualValue = parseFloat(document.getElementById("residual-value").value || 0);
+
+      if (downPayment < 0 || downPayment + residualValue >= amount) {
+        alert("頭金と残価の合計はローン金額より小さくしてください");
+        return;
+      }
+
+      const loanAmount = amount - downPayment - residualValue;
       const months = years * 12;
       const monthlyRate = annualRate / 100 / 12;
 
-      // ローン金額から残価を引いた額を計算
-      const loanAmount = amount - residualValue;
-
-      // 毎月の支払額計算
       const monthlyPayment = (loanAmount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months));
       const totalPayment = monthlyPayment * months + residualValue;
 
-      // 結果を画面に表示
       document.getElementById("monthly-payment").textContent = Math.round(monthlyPayment).toLocaleString();
       document.getElementById("total-payment").textContent = Math.round(totalPayment).toLocaleString();
+
+      document.getElementById("summary-amount").textContent = amount.toLocaleString();
+      document.getElementById("summary-down").textContent = downPayment.toLocaleString();
+      document.getElementById("summary-residual").textContent = residualValue.toLocaleString();
+      document.getElementById("summary-years").textContent = years;
+      document.getElementById("summary-rate").textContent = annualRate;
 
       const today = new Date();
       const startYear = today.getMonth() === 11 ? today.getFullYear() + 1 : today.getFullYear();
@@ -210,12 +219,10 @@
         }
       });
 
-      // 画面遷移
       inputScreen.classList.add('hidden');
       resultScreen.classList.remove('hidden');
     });
 
-    // 戻るボタン
     document.getElementById("backBtn").addEventListener("click", () => {
       resultScreen.classList.add('hidden');
       inputScreen.classList.remove('hidden');
